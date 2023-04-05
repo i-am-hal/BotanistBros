@@ -16,4 +16,22 @@ def center(text, maxlength=20):
 	
 	return left_buffer + text
 
+#Variable used to nab the current selected option in each tab
+SELECTION = "SELECTION"
+#Variable used to grab the options which the user can pick between in relevant tab
+OPTIONS   = "OPTIONS"
+
+#The two seperate 'tabs' where user can make relevant options
+UI_tabs = {
+	"Delay": {
+		SELECTION: 0,
+		OPTIONS: []
+		},
+
+	"Water": {
+		SELECTION: 0,
+		OPTIONS: []
+		} 
+}
+
 screen.printline(1, center("Hello, World!"))
