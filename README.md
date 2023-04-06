@@ -17,6 +17,7 @@ pip install liquidcrystal_i2c
 		- [ ] Make input change selection
 		- [ ] "Roll" to beginning once end met
 		- [ ] !! Always display SELECTED setting on change to tab !!
+		- [ ] Display setting number at bottom ("1/6" for example)
 
 	- [ ] Button Inputs
 		- [ ] Recieve Button Presses
