@@ -1,9 +1,59 @@
+"""
+"""
+
 from math import ceil
 from enum import Enum, auto
-import liquidcrystal_i2c
+from liquidcrystal_i2c import LiquidCrystal_I2C as I2C_LCD
+
+#This is a class for the convenience of me, Alastar. For various
+# reasons the actual physical LCD screen I have is being almost
+# unusable. This class allows me to use the physical screen,
+# and have it update the physical screen as I would hope, while
+# allowing me to see and test the UI on an actual computer screen.
+class LCD:
+	def __init__(self, addr, bus, numlines=2, linelen=20):
+		self.lcd = I2C_LCD(addr, bus, numlines=numlines) 
+		self.screen = [" " * linelen] * numlines
+		self.linelength = linelen
+		self.numlines   = numlines
+	
+	def eraseScreen(self):
+		print("\n" * 100)	
+
+	def writeLine(self, line, string):
+		#raise error if too large a value
+		if line >= self.numlines:
+			raise ValueError(f"ERROR: {line} is not within max bound {self.numlines-1}")
+		
+		scrnLine  = list(self.screen[line]) #Screen line, now not weird w/ pointers
+		charIndex = 0                      
+		
+		#Add these characters to virtual screen
+		while charIndex < len(string):
+			scrnLine[charIndex] = string[charIndex]
+			charIndex += 1
+
+		#Save changes to the screen 
+		self.screen[line] = "".join(scrnLine)
+	
+	#Print out all te lines in the virtual screen
+	def updateScreen(self):
+		print('\n'.join(self.screen))
+	
+	def printline(self, line, string):
+		self.eraseScreen()
+		self.writeLine(line, string)
+		self.lcd.printline(line, string)
+		self.updateScreen()
+		
 
 #Instantiates the lcd screen that we will be using this whole time
-screen = liquidcrystal_i2c.LiquidCrystal_I2C(0x27, 1, numlines=4)
+#screen = liquidcrystal_i2c.LiquidCrystal_I2C(0x27, 1, numlines=4)
+screen = LCD(0x27, 1, numlines=4)
+screen.eraseScreen()
+#screen.backlight() #255)
+
+#screen.printline(0, "Hi")
 
 #Time unit, can be day or week
 class Time(Enum):
@@ -131,4 +181,3 @@ if __name__ == "__main__":
 			else:
 				UI_tabs[tab][SELECTION] += 1
 			
-		
