@@ -59,8 +59,6 @@ screen = LCD(0x27, 1, numlines=4)
 screen.eraseScreen()
 #screen.backlight() #255)
 
-#screen.printline(0, "Hi")
-
 #Time unit, can be day or week
 class Time(Enum):
 	DAY   = auto()
@@ -113,16 +111,20 @@ def clearline(display, line,  maxchars=20):
 SELECTION = "SELECTION"
 #Variable used to grab the options which the user can pick between in relevant tab
 OPTIONS   = "OPTIONS"
+#Length of options list (how many options there are)
+OPT_LEN   = "OPT_LEN"
 
 #The two seperate 'tabs' where user can make relevant options
 UI_tabs = {
 	"Delay": {
 		SELECTION: 0,
+		OPT_LEN: 0,   #Will get set to correct number in prep func
 		OPTIONS: [DelayOption(Time.DAY, 1), DelayOption(Time.DAY, 2)]
 		},
 
 	"Water": {
 		SELECTION: 0,
+		OPT_LEN: 0,   #Will get set correct in prep func
 		OPTIONS: [WaterOption(10), WaterOption(20)]
 		} 
 }
@@ -135,6 +137,8 @@ tabSelLines = {
 
 #The index (which tab) is selected
 tab_select = 0
+#Select tab name rom index
+selectedTab = lambda i: list(UI_tabs)[i]
 
 #Takes tab index, wraps to first tab if going past options, else, next option
 wrapTab = lambda n: 0 if n >= len(list(UI_tabs)) else n
@@ -143,12 +147,15 @@ def update_ui():
 	#Using the current selection, pick relevent line below tab names
 	screen.printline(1, tabSelLines[tab_select])
 
-	tab     = list(UI_tabs)[tab_select]
+	tab     = selectedTab(tab_select)
 	options = UI_tabs[tab][OPTIONS]
 	opt_sel = UI_tabs[tab][SELECTION]
+	max_opt = UI_tabs[tab][OPT_LEN]
 
 	clearline(screen, 2) #clear out second line, remove remaining chars
 	screen.printline(2, center(str(options[opt_sel])))
+	#Display to user that they have N/M selected in tab
+	screen.printline(3, " " * 15 + f"{opt_sel+1:02d}/{max_opt:02d}")
 
 #
 def display_ui():
@@ -156,8 +163,15 @@ def display_ui():
 	screen.printline(0, " | ".join(UI_tabs) + " |")
 	update_ui()
 
+#Ensures that the OPT_LEN properties are the required length
+def prep_opt_length():
+	for tab in UI_tabs:
+		UI_tabs[tab][OPT_LEN] = len(UI_tabs[tab][OPTIONS])
+
 if __name__ == "__main__":
 	from time import sleep
+
+	prep_opt_length()
 	
 	display_ui()
 	

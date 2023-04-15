@@ -9,17 +9,17 @@ pip install liquidcrystal_i2c
 
 ## Implementation
 
-- [ ] User Interface
+- [X] User Interface
 	- [X] Display Tabs
 	- [X] Implement Tab Switching
-	- [ ] Implement Changing Tab Settings
+	- [X] Implement Changing Tab Settings
 		- [X] Implement Settings Datastructures
 			- [X] Time Delay Class (printable, stores DAY/WEEK and number of)
 			- [X] Moisture%  Class? (depends on sensor data, un-needed?)
 		- [X] Make input change selection
 		- [X] "Roll" to beginning once end met
 		- [X] !! Always display SELECTED setting on change to tab !!
-		- [ ] Display setting number at bottom ("1/6" for example)
+		- [X] Display setting number at bottom ("1/6" for example)
 
 	- [ ] Button Inputs
 		- [ ] Recieve Button Presses
