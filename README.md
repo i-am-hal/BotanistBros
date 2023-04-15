@@ -1,7 +1,9 @@
 # Plant Nanny
 
 ## Notes
-https://wili.52pi.com/index.php?title=Z-0235
+https://wiki.52pi.com/index.php?title=Z-0235
+
+https://www.instructables.com/Raspberry-PI-Multiple-I2c-Devices/
 
 pip install liquidcrystal_i2c
 
