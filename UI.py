@@ -6,8 +6,8 @@ Info:   A series of routines, definitions, and classes
 which enable the user interface for the Plant Nanny.
 UI is displayed on a LCD screen, 4x20 characters.
 """
-
 from math import ceil
+from time import sleep
 from enum import Enum, auto
 from liquidcrystal_i2c import LiquidCrystal_I2C as I2C_LCD
 
@@ -168,9 +168,8 @@ def prep_opt_length():
 	for tab in UI_tabs:
 		UI_tabs[tab][OPT_LEN] = len(UI_tabs[tab][OPTIONS])
 
-if __name__ == "__main__":
-	from time import sleep
 
+if __name__ == "__main__":
 	prep_opt_length()
 	
 	display_ui()
@@ -201,3 +200,4 @@ if __name__ == "__main__":
 
 			#Update no matter what
 			update_ui()
+
