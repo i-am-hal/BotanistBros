@@ -104,7 +104,7 @@ def center(text, maxlength=20):
 	return left_buffer + text
 
 #Clears out a line so we have no leftover chars
-def clearline(display, line,  maxchars=20):
+def clearline(display, line, maxchars=20):
 	display.printline(line, " " * maxchars)
 
 #Variable used to nab the current selected option in each tab
@@ -119,13 +119,19 @@ UI_tabs = {
 	"Delay": {
 		SELECTION: 0,
 		OPT_LEN: 0,   #Will get set to correct number in prep func
-		OPTIONS: [DelayOption(Time.DAY, 1), DelayOption(Time.DAY, 2)]
+		OPTIONS: [
+			DelayOption(Time.DAY, 1), DelayOption(Time.DAY, 2), 
+			DelayOption(Time.DAY, 3), DelayOption(Time.DAY, 4),
+			DelayOption(Time.DAY, 5), DelayOption(Time.DAY, 6),
+			DelayOption(Time.WEEK, 1), DelayOption(Time.WEEK, 2),
+			DelayOption(Time.WEEK, 3), DelayOption(Time.WEEK, 4)
+			]
 		},
 
 	"Water": {
 		SELECTION: 0,
 		OPT_LEN: 0,   #Will get set correct in prep func
-		OPTIONS: [WaterOption(10), WaterOption(20)]
+		OPTIONS: [WaterOption(10), WaterOption(15), WaterOption(20), WaterOption(25)]
 		} 
 }
 
