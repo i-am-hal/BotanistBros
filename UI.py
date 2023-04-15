@@ -7,8 +7,10 @@ screen = liquidcrystal_i2c.LiquidCrystal_I2C(0x27, 1, numlines=4)
 
 #Time unit, can be day or week
 class Time(Enum):
-	DAY  = auto()
-	WEEK = auto()
+	DAY   = auto()
+	WEEK  = auto()
+	#HOUR  = auto()
+	#MONTH = auto()
 
 #An option for delay, some number of days/weeks
 class DelayOption:
@@ -26,6 +28,17 @@ class DelayOption:
 
 	def __len__(self):
 		return len(self.__str__())		  
+
+class WaterOption:
+	def __init__(self, percent):
+		self.percet = percent
+
+		#if 0 >= percent =< 1:
+		#	self.percent = int(percent * 100)
+	
+	__repr__ = lambda self: f"{self.percent}%"
+	__str__ = lambda self: self.__repr__()
+	__len__ = lambda self: len(self.__repr__())
 
 #Given some text, adds spaces to the left to center the text
 def center(text, maxlength=20):
@@ -51,7 +64,7 @@ OPTIONS   = "OPTIONS"
 UI_tabs = {
 	"Delay": {
 		SELECTION: 0,
-		OPTIONS: [DelayOption(Time.DAY, 1)]
+		OPTIONS: [DelayOption(Time.DAY, 1), DelayOption(Time.DAY, 2)]
 		},
 
 	"Water": {
@@ -106,4 +119,16 @@ if __name__ == "__main__":
 			tab_select = wrapTab(tab_select+1)
 			print(f"Next tab {tab_select}")
 			update_ui()
-
+		
+		#
+		elif cmd in "2o":
+			tab = list(UI_tabs)[tab_select]
+			tab_options  = UI_tabs[tab][OPTIONS]
+			tab_curr_sel = UI_tabs[tab][SELECTION]
+			
+			if tab_curr_sel >= len(tab_options)-1:
+				UI_tabs[tab][SELECTION] = 0
+			else:
+				UI_tabs[tab][SELECTION] += 1
+			
+		

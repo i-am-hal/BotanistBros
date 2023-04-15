@@ -24,8 +24,19 @@ pip install liquidcrystal_i2c
 		- [ ] Equate Button Presses to Tab/Setting switching
 
 - [ ] Watering 
+	- [ ] Sensor Data
+		- [ ] Be able to recieve moissture%
+
+	- [ ] Clock
+		- [ ] Read system time
+		- [ ] Recognize 'check time' (when to start water cycle)
+
+	- [ ] Water Cycle
+		- [ ] Control water pump (deposit water)
+		- [ ] Functional moisture-check-loop
 
 OPTIONAL:
+- [ ] Detect permiation time - incorperate in system - CALIBRATE
 - [ ] UI - Countdown timer
 - [ ] Save User Settings
 	- [ ] Write user settings to local file
