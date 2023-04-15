@@ -13,9 +13,9 @@ pip install liquidcrystal_i2c
 	- [X] Display Tabs
 	- [X] Implement Tab Switching
 	- [ ] Implement Changing Tab Settings
-		- [ ] Implement Settings Datastructures
+		- [X] Implement Settings Datastructures
 			- [X] Time Delay Class (printable, stores DAY/WEEK and number of)
-			- [ ] Moisture%  Class? (depends on sensor data, un-needed?)
+			- [X] Moisture%  Class? (depends on sensor data, un-needed?)
 		- [X] Make input change selection
 		- [X] "Roll" to beginning once end met
 		- [X] !! Always display SELECTED setting on change to tab !!
