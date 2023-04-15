@@ -9,7 +9,7 @@ pip install liquidcrystal_i2c
 
 ## Implementation
 
-- [X] User Interface
+- [ ] User Interface
 	- [X] Display Tabs
 	- [X] Implement Tab Switching
 	- [X] Implement Changing Tab Settings
