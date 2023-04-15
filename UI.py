@@ -170,7 +170,7 @@ if __name__ == "__main__":
 			print(f"Next tab {tab_select}")
 			update_ui()
 		
-		#
+		#Cycle through options in this tab
 		elif cmd in "2o":
 			tab = list(UI_tabs)[tab_select]
 			tab_options  = UI_tabs[tab][OPTIONS]
@@ -180,4 +180,6 @@ if __name__ == "__main__":
 				UI_tabs[tab][SELECTION] = 0
 			else:
 				UI_tabs[tab][SELECTION] += 1
-			
+
+			#Update no matter what
+			update_ui()
