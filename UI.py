@@ -1,4 +1,10 @@
 """
+File:   UI.py
+Author: Alastar Slater
+Date:   April 15, 2023
+Info:   A series of routines, definitions, and classes
+which enable the user interface for the Plant Nanny.
+UI is displayed on a LCD screen, 4x20 characters.
 """
 
 from math import ceil
@@ -80,12 +86,10 @@ class DelayOption:
 		return len(self.__str__())		  
 
 class WaterOption:
+	#Percent is just an integer 1-100
 	def __init__(self, percent):
-		self.percet = percent
+		self.percent = percent
 
-		#if 0 >= percent =< 1:
-		#	self.percent = int(percent * 100)
-	
 	__repr__ = lambda self: f"{self.percent}%"
 	__str__ = lambda self: self.__repr__()
 	__len__ = lambda self: len(self.__repr__())
@@ -119,7 +123,7 @@ UI_tabs = {
 
 	"Water": {
 		SELECTION: 0,
-		OPTIONS: ["NONE"]
+		OPTIONS: [WaterOption(10), WaterOption(20)]
 		} 
 }
 
