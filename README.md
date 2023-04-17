@@ -7,6 +7,20 @@ https://www.instructables.com/Raspberry-PI-Multiple-I2c-Devices/
 
 pip install liquidcrystal_i2c
 
+## Save Data
+
+The Plant Nanny will routinely save data related to user settings,
+last recorded system time, and upcoming moisture check time. This
+will be put into some kind of text document that will organize
+this data as such:
+
+```
+1 time of next moisture check
+2 last recorded system time
+3 moisture check delay setting
+4 moisture level setting
+```
+
 ## Implementation
 
 - [ ] User Interface
