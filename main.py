@@ -1,15 +1,77 @@
-from UI import *
+"""
+File:   main.py
+Date:   April 18
+Author: Alastar Slater
+Info:   The entrypoint for the Plant Nanny program.
+Inputs, be it from keyboard buttons or regular ones,
+are reistered here. Will save user settings to a file,
+and oversee the intermittent watering of the plant 
+when the time is needed.
+
+Save file data:
+NOW:time last recorded
+NEXT-CHECK:time for next moisture check
+SETTING-DELAY:index for what delay option is selected
+SETTING-WATER:index for what water option is selected
+"""
+
 import curses
+from UI import *
+from inputs import *
+from os import path
 from curses import wrapper
 from datetime import datetime, timedelta
 
+#Constants for settings file
+SETTINGS        = "plantnanny.save.txt"
+TIME_NOW        = "NOW"
+NEXT_SOIL_CHECK = "NEXT-CHECK"
+SETTING_DELAY   = "SETTING-DELAY"
+SETTING_WATER   = "SETTING-WATER"
+#Parse string needed to parse times from save file
+TIME_PARSE_STR  = "%Y-%m-%d %H:%M:%S.%f"
+
+#Reads the save file, parses info, returns save data as dict
+def read_save() -> dict:
+	#Get all of the lines from the save file
+	lines = [line.strip() for line in open(SETTINGS, 'r').readlines()]
+	#Create key-value pairs based on all the lines of info
+	pairs = [l.split(':') for l in lines]
+	#Take the key-value pairs and shove them into dictionary that is save data
+	data = {name:value for (name,value) in pairs}
+
+	#Parses last recorded time into a datetime object
+	data[TIME_NOW] = datetime.strptime(data[TIME_NOW], TIME_PARSE_STR)
+	#Parses the estimated time for the soil to be checked
+	data[NEXT_SOIL_CHECK] = datetime.strptime(data[NEXT_SOIL_CHECK], TIME_PARSE_STR)
+	#Convert the indices for water, delay settings into integers
+	data[SETTING_DELAY] = int(data[SETTING_DELAY])
+	data[SETTING_WATER] = int(data[SETTING_WATER])
+	
+	return data
+
+#Loads saved data, but only if there is save data
+def load_saved_data() -> (bool, dict):
+	if path.isfile(SETTINGS):
+		return True, read_save()
+	
+	return False, {SETTING_DELAY: 0, SETTING_WATER: 0}
+
 def main(curseScrn):
+	#Makes getch non-blocking, allowing to glance at character inputs
 	curseScrn.nodelay(True)
+
 	#Instantiates the lcd screen that we will be using this whole time
-	#screen = liquidcrystal_i2c.LiquidCrystal_I2C(0x27, 1, numlines=4)
 	screen = LCD(0x27, 1, curseScrn, numlines=4)
-	#screen.eraseScreen()
-	#screen.backlight() #255)
+
+	#Attempt to load any save data from the program
+	save_data_exists, save_data = load_saved_data()
+
+	#If the local save data exists, use it
+	if save_data_exists:
+		#Makes ui reflect that these should be the selected options from onset
+		UI_tabs["Delay"][SELECTION] = save_data[SETTING_DELAY]	
+		UI_tabs["Water"][SELECTION] = save_data[SETTING_WATER]	
 
 	prep_opt_length()
 
@@ -20,9 +82,20 @@ def main(curseScrn):
 
 	cmd = ""	
 
-	#print("Enter 1 or s to change tab.\nEnter 2 or o to change option.\n\n")
+	last_pulse = datetime.now() 
+	five_mins  = timedelta(minutes=5)
+	next_pulse = last_pulse + five_mins
 
 	while True:
+		now = datetime.now()
+
+		#Every five minutes:
+		# 1) Update UI: time till watering
+		# 2) Write current time to file
+		if now >= next_pulse:
+			last_pulse = now			
+			next_pulse = now + five_mins
+
 		#Go to next tab
 		if cmd in "1s":
 			tab_select = wrapTab(tab_select+1)
