@@ -56,8 +56,8 @@ OPTIONAL:
 - [ ] UI - Countdown timer
 - [ ] Save User Settings
 	- [ ] Write user settings to local file
-	- [ ] Startup check + read user settings
-		- [ ] Set run time variables per settings 
+	- [X] Startup check + read user settings
+		- [X] Set run time variables per settings 
 
 - [ ] Remember Timing
 	- [ ] Write start of wait to local file
