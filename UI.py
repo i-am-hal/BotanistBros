@@ -9,14 +9,10 @@ UI is displayed on a LCD screen, 4x20 characters.
 import curses
 from curses import wrapper
 from math import ceil
-from serial import Serial
 from enum import Enum, auto
 from time import sleep
 from datetime import datetime, timedelta
 from liquidcrystal_i2c import LiquidCrystal_I2C as I2C_LCD
-
-#Globals for location and port for the serial
-SER_LOC, SER_PORT = "/dev/ttyACM0", 9600
 
 #This is a class for the convenience of me, Alastar. For various
 # reasons the actual physical LCD screen I have is being almost

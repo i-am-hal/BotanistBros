@@ -17,10 +17,14 @@ SETTING-WATER:index for what water option is selected
 
 import curses
 from UI import *
-from inputs import *
+from devices import *
+from serial import Serial
 from os import path, remove
 from curses import wrapper
 from datetime import datetime, timedelta
+
+#Globals for location and port for the serial
+SER_LOC, SER_PORT = "/dev/ttyACM0", 9600
 
 #Constants for settings file
 SETTINGS        = "plantnanny.save.txt"
@@ -67,9 +71,26 @@ def write_save_data(data:dict):
 		for save_key in data:         #Write each piece of data in file
 			settings.write(f"{save_key}: {data[save_key]}\n")
 
+#Given serial port, and required water level, checks and gets to that water level
+def moisture_loop(serialPort, waterLevel):
+	moisture = readMoisture(serialPort)
+	
+	#Open file, write this debug information
+	with open('water-log.txt', 'w') as f:
+		f.write(f"Moisture {moisture:03d}% at {datetime.now()}\n")
+	
+	#While the moisture level isn't desired level
+	while moisture < waterLevel.percent:
+		#Water the plant! NEEDS IMPLEMENTING LOL
+		moisture = readMoisture(serialPort)
+		break #STOP BECAUSE WE CANNOT WATER THE PLANT YET HAHAHAHA
+
 def main(curseScrn):
 	#Makes getch non-blocking, allowing to glance at character inputs
 	curseScrn.nodelay(True)
+	
+	#Create the serial port to read moisture readings
+	serial = Serial(SER_LOC, SER_PORT)
 
 	#Instantiates the lcd screen that we will be using this whole time
 	screen = LCD(0x27, 1, curseScrn, numlines=4)
@@ -88,6 +109,7 @@ def main(curseScrn):
 		#Save the time for the next soil check
 		next_soil_check = save_data[NEXT_SOIL_CHECK]
 
+	#Changes UI tabs so that each tab has correct number of options (opt-len)
 	prep_opt_length()
 
 	#The index (which tab) is selected
@@ -101,7 +123,7 @@ def main(curseScrn):
 	force_soil_check = True
 
 	last_pulse = datetime.now() 
-	five_mins  = timedelta(minutes=5)
+	five_mins  = timedelta(minutes=5) #timedelta(minutes=1) 
 	next_pulse = last_pulse + five_mins
 
 	#soil_check_time = last_pulse
@@ -126,17 +148,19 @@ def main(curseScrn):
 
 			#if there is no saved time for soil check, check soil NOW
 			if not next_soil_check:
+				moisture_loop(serial, moisture_lvl)
 				next_soil_check = datetime.now() + delay_time
-				#moisture_loop()
 			
 			#If it is time for the soil check, do it, update timer
 			elif now >= next_soil_check:
-				pass	
-				#moisture_loop()
+				moisture_loop(serial, moisture_lvl)
+				next_soil_check = datetime.now() + delay_time
 
 			else: #Otherwise, just wait another 5 mins to check
 				last_pulse = now			
 				next_pulse = now + five_mins
+
+			break #STOP STOP STOP STOP STOP 
 
 			#Store current time, next soil check, and settings to save file
 			save_data[TIME_NOW]        = str(now)
@@ -146,7 +170,6 @@ def main(curseScrn):
 		
 			#Saves the users selections, current time, next soil check
 			write_save_data(save_data)
-			break
 
 		#Go to next tab
 		if cmd in "1s":
