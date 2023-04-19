@@ -1,6 +1,7 @@
 from UI import *
 import curses
 from curses import wrapper
+from datetime import datetime, timedelta
 
 def main(curseScrn):
 	curseScrn.nodelay(True)

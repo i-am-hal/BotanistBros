@@ -12,7 +12,6 @@ from math import ceil
 from serial import Serial
 from enum import Enum, auto
 from time import sleep
-from inputs import readMoisture
 from datetime import datetime, timedelta
 from liquidcrystal_i2c import LiquidCrystal_I2C as I2C_LCD
 
