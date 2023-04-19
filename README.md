@@ -43,8 +43,8 @@ this data as such:
 	- [ ] Sensor Data
 		- [ ] Be able to recieve moissture%
 
-	- [ ] Clock
-		- [ ] Read system time
+	- [X] Clock
+		- [X] Read system time
 		- [ ] Recognize 'check time' (when to start water cycle)
 
 	- [ ] Water Cycle
@@ -54,13 +54,13 @@ this data as such:
 OPTIONAL:
 - [ ] Detect permiation time - incorperate in system - CALIBRATE
 - [ ] UI - Countdown timer
-- [ ] Save User Settings
-	- [ ] Write user settings to local file
+- [X] Save User Settings
+	- [X] Write user settings to local file
 	- [X] Startup check + read user settings
 		- [X] Set run time variables per settings 
 
-- [ ] Remember Timing
-	- [ ] Write start of wait to local file
-	- [ ] Routinely update current time in local file
+- [X] Remember Timing
+	- [X] Write start of wait to local file
+	- [X] Routinely update current time in local file
 
 

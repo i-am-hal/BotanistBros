@@ -18,7 +18,7 @@ SETTING-WATER:index for what water option is selected
 import curses
 from UI import *
 from inputs import *
-from os import path
+from os import path, remove
 from curses import wrapper
 from datetime import datetime, timedelta
 
@@ -36,7 +36,7 @@ def read_save() -> dict:
 	#Get all of the lines from the save file
 	lines = [line.strip() for line in open(SETTINGS, 'r').readlines()]
 	#Create key-value pairs based on all the lines of info
-	pairs = [l.split(':') for l in lines]
+	pairs = [l.split(': ') for l in lines]
 	#Take the key-value pairs and shove them into dictionary that is save data
 	data = {name:value for (name,value) in pairs}
 
@@ -57,6 +57,16 @@ def load_saved_data() -> (bool, dict):
 	
 	return False, {SETTING_DELAY: 0, SETTING_WATER: 0}
 
+#Takes the save data dictionary, and writes it to the save file
+def write_save_data(data:dict):
+	#Only delete the last save file if it exists
+	if path.isfile(SETTINGS):
+		remove(SETTINGS)
+
+	with open(SETTINGS, 'w') as settings: #Open the settings file for writing
+		for save_key in data:         #Write each piece of data in file
+			settings.write(f"{save_key}: {data[save_key]}\n")
+
 def main(curseScrn):
 	#Makes getch non-blocking, allowing to glance at character inputs
 	curseScrn.nodelay(True)
@@ -67,11 +77,16 @@ def main(curseScrn):
 	#Attempt to load any save data from the program
 	save_data_exists, save_data = load_saved_data()
 
+	#Default of False (not set), will cause us first-force-watering
+	next_soil_check = False 
+
 	#If the local save data exists, use it
 	if save_data_exists:
 		#Makes ui reflect that these should be the selected options from onset
 		UI_tabs["Delay"][SELECTION] = save_data[SETTING_DELAY]	
 		UI_tabs["Water"][SELECTION] = save_data[SETTING_WATER]	
+		#Save the time for the next soil check
+		next_soil_check = save_data[NEXT_SOIL_CHECK]
 
 	prep_opt_length()
 
@@ -81,10 +96,15 @@ def main(curseScrn):
 	display_ui(screen, tab_select)
 
 	cmd = ""	
+	
+	#First pulse will force a soil-check to ensure it's moist
+	force_soil_check = True
 
 	last_pulse = datetime.now() 
 	five_mins  = timedelta(minutes=5)
 	next_pulse = last_pulse + five_mins
+
+	#soil_check_time = last_pulse
 
 	while True:
 		now = datetime.now()
@@ -92,9 +112,41 @@ def main(curseScrn):
 		#Every five minutes:
 		# 1) Update UI: time till watering
 		# 2) Write current time to file
+		# 3) See if it is time to check soil
+		#    3a) Check + water soil
+		#    3b) Save upcoming check time
 		if now >= next_pulse:
-			last_pulse = now			
-			next_pulse = now + five_mins
+			#Fetch the water and delay selections made by the user
+			water_tab_sel = UI_tabs["Water"][SELECTION]
+			delay_tab_sel = UI_tabs["Delay"][SELECTION]
+
+			#Retrieve the moisture percentage, and delay time selected by user
+			moisture_lvl  = UI_tabs["Water"][OPTIONS][water_tab_sel]
+			delay_time    = UI_tabs["Delay"][OPTIONS][delay_tab_sel].deltatime
+
+			#if there is no saved time for soil check, check soil NOW
+			if not next_soil_check:
+				next_soil_check = datetime.now() + delay_time
+				#moisture_loop()
+			
+			#If it is time for the soil check, do it, update timer
+			elif now >= next_soil_check:
+				pass	
+				#moisture_loop()
+
+			else: #Otherwise, just wait another 5 mins to check
+				last_pulse = now			
+				next_pulse = now + five_mins
+
+			#Store current time, next soil check, and settings to save file
+			save_data[TIME_NOW]        = str(now)
+			save_data[NEXT_SOIL_CHECK] = str(next_soil_check)
+			save_data[SETTING_DELAY]   = str(delay_tab_sel)
+			save_data[SETTING_WATER]   = str(water_tab_sel)
+		
+			#Saves the users selections, current time, next soil check
+			write_save_data(save_data)
+			break
 
 		#Go to next tab
 		if cmd in "1s":
