@@ -40,16 +40,16 @@ this data as such:
 		- [ ] Equate Button Presses to Tab/Setting switching
 
 - [ ] Watering 
-	- [ ] Sensor Data
-		- [ ] Be able to recieve moissture%
+	- [X] Sensor Data
+		- [X] Be able to recieve moissture%
 
 	- [X] Clock
 		- [X] Read system time
-		- [ ] Recognize 'check time' (when to start water cycle)
+		- [X] Recognize 'check time' (when to start water cycle)
 
 	- [ ] Water Cycle
 		- [ ] Control water pump (deposit water)
-		- [ ] Functional moisture-check-loop
+		- [X] Functional moisture-check-loop
 
 OPTIONAL:
 - [ ] Detect permiation time - incorperate in system - CALIBRATE
