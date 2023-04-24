@@ -1,4 +1,12 @@
+import RPi.GPIO as GPIO
 
+#Given the pin for the motor, turn it on
+def motor_on(pin):
+	GPIO.output(pin, GPIO.HIGH)
+
+#Given the pin for the motor, turn it on
+def motor_off(pin):
+	GPIO.output(pin, GPIO.LOW)
 
 #Reads moisture percentage from serial input
 def readMoisture(serialInput):
