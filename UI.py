@@ -193,6 +193,10 @@ def update_ui(screen, tab_select):
 
 #Displays all of UI, top text, and last 2 lines which always update
 def display_ui(screen, tab_select):
+	#First clear all the lines in the screen
+	for i in range(screen.numlines):
+		clearline(screen, i)
+
 	#Display the tab names at the very top
 	screen.printline(0, " | ".join(UI_tabs) + " |")
 	update_ui(screen, tab_select)

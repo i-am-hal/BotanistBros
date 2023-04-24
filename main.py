@@ -88,7 +88,21 @@ def write_save_data(data:dict):
 			settings.write(f"{save_key}: {data[save_key]}\n")
 
 #Given serial port, and required water level, checks and gets to that water level
-def moisture_loop(serialPort, waterLevel):
+def moisture_loop(serialPort, waterLevel, screen):
+	#Display message that the plant is being watered
+	screen.eraseScreen()
+	screen.printline(0, "-" * 20)
+
+	clearline(screen, 1)
+	screen.printline(1, center("WATERING IN PROGRESS"))
+
+	clearline(screen, 2)
+	screen.printline(2, center("PLEASE WAIT"))
+
+	screen.printline(3, "-" * 20)
+	screen.refresh()
+
+
 	if HAVE_SERIAL:
 		moisture = readMoisture(serialPort)
 	else:
@@ -109,7 +123,6 @@ def moisture_loop(serialPort, waterLevel):
 			moisture = readMoisture(serialPort)
 		else:
 			break
-		break #STOP BECAUSE WE CANNOT WATER THE PLANT YET HAHAHAHA
 
 def main(curseScrn):
 	GPIO.setwarnings(False)  #ignore warnings
@@ -162,7 +175,7 @@ def main(curseScrn):
 	force_soil_check = True
 
 	last_pulse = datetime.now() 
-	five_mins  = timedelta(minutes=5) #timedelta(minutes=1) 
+	five_mins  = timedelta(minutes=1) #timedelta(minutes=5)
 	next_pulse = last_pulse + five_mins
 
 	while True:
@@ -185,12 +198,16 @@ def main(curseScrn):
 
 			#if there is no saved time for soil check, check soil NOW
 			if not next_soil_check:
-				moisture_loop(serial, moisture_lvl)
+				moisture_loop(serial, moisture_lvl, screen)
+				#Redisplay the original UI
+				display_ui(screen, tab_select)
 				next_soil_check = datetime.now() + delay_time
 			
 			#If it is time for the soil check, do it, update timer
 			elif now >= next_soil_check:
-				moisture_loop(serial, moisture_lvl)
+				moisture_loop(serial, moisture_lvl, screen)
+				#Redisplay the original UI
+				display_ui(screen, tab_select)
 				next_soil_check = datetime.now() + delay_time
 
 			else: #Otherwise, just wait another 5 mins to check
@@ -205,8 +222,6 @@ def main(curseScrn):
 		
 			#Saves the users selections, current time, next soil check
 			write_save_data(save_data)
-
-			break #STOP STOP STOP STOP STOP 
 
 		#Go to next tab
 		if cmd in "1s" or GPIO.input(BUTTON_A) == GPIO.HIGH:
