@@ -9,22 +9,32 @@ and oversee the intermittent watering of the plant
 when the time is needed.
 
 Save file data:
-NOW:time last recorded
-NEXT-CHECK:time for next moisture check
-SETTING-DELAY:index for what delay option is selected
-SETTING-WATER:index for what water option is selected
+NOW: time last recorded
+NEXT-CHECK: time for next moisture check
+SETTING-DELAY: index for what delay option is selected
+SETTING-WATER: index for what water option is selected
 """
 
 import curses
 from UI import *
 from devices import *
+import RPi.GPIO as GPIO
 from serial import Serial
 from os import path, remove
 from curses import wrapper
 from datetime import datetime, timedelta
+from time import sleep
 
 #Globals for location and port for the serial
 SER_LOC, SER_PORT = "/dev/ttyACM0", 9600
+
+#Defines what pins are for hat buttons
+BUTTON_A        = 10
+BUTTON_B        = 12
+MOTOR           = 21
+
+#How long the motor should be on for spewing water (in seconds)
+WATER_PULSE     = 0.1
 
 #Constants for settings file
 SETTINGS        = "plantnanny.save.txt"
@@ -32,6 +42,12 @@ TIME_NOW        = "NOW"
 NEXT_SOIL_CHECK = "NEXT-CHECK"
 SETTING_DELAY   = "SETTING-DELAY"
 SETTING_WATER   = "SETTING-WATER"
+
+#true or false on if we have a serial input to use
+HAVE_SERIAL     = False
+#If shouldn't create an LCD screen or not
+NO_LCD          = True 
+
 #Parse string needed to parse times from save file
 TIME_PARSE_STR  = "%Y-%m-%d %H:%M:%S.%f"
 
@@ -73,7 +89,10 @@ def write_save_data(data:dict):
 
 #Given serial port, and required water level, checks and gets to that water level
 def moisture_loop(serialPort, waterLevel):
-	moisture = readMoisture(serialPort)
+	if HAVE_SERIAL:
+		moisture = readMoisture(serialPort)
+	else:
+		moisture = 0
 	
 	#Open file, write this debug information
 	with open('water-log.txt', 'w') as f:
@@ -81,19 +100,39 @@ def moisture_loop(serialPort, waterLevel):
 	
 	#While the moisture level isn't desired level
 	while moisture < waterLevel.percent:
-		#Water the plant! NEEDS IMPLEMENTING LOL
-		moisture = readMoisture(serialPort)
+		motor_on(MOTOR)    #Turn on the motor
+		sleep(WATER_PULSE) #Wait `water pulse` seconds long before shutoff
+		motor_off(MOTOR)   #Turn off the motor	
+		sleep(60)          #Wait a minute beore checking
+
+		if HAVE_SERIAL:
+			moisture = readMoisture(serialPort)
+		else:
+			break
 		break #STOP BECAUSE WE CANNOT WATER THE PLANT YET HAHAHAHA
 
 def main(curseScrn):
+	GPIO.setwarnings(False)  #ignore warnings
+	GPIO.setmode(GPIO.BOARD) #Use physical pin numbering
+
+	#Read from pin 10, as a GPIO input, recieve input as a GPIO push down event
+	GPIO.setup(BUTTON_A, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+	#Read from pin 12, as a GPIO input, recieve input as a GPIO push down event
+	GPIO.setup(BUTTON_B, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+	#Set
+	GPIO.setup(MOTOR, GPIO.OUT)
+
 	#Makes getch non-blocking, allowing to glance at character inputs
 	curseScrn.nodelay(True)
 	
-	#Create the serial port to read moisture readings
-	serial = Serial(SER_LOC, SER_PORT)
+	if HAVE_SERIAL:
+		#Create the serial port to read moisture readings
+		serial = Serial(SER_LOC, SER_PORT)
+	else:
+		serial = None
 
 	#Instantiates the lcd screen that we will be using this whole time
-	screen = LCD(0x27, 1, curseScrn, numlines=4)
+	screen = LCD(0x27, 1, curseScrn, numlines=4, no_lcd=NO_LCD)
 
 	#Attempt to load any save data from the program
 	save_data_exists, save_data = load_saved_data()
@@ -125,8 +164,6 @@ def main(curseScrn):
 	last_pulse = datetime.now() 
 	five_mins  = timedelta(minutes=5) #timedelta(minutes=1) 
 	next_pulse = last_pulse + five_mins
-
-	#soil_check_time = last_pulse
 
 	while True:
 		now = datetime.now()
@@ -160,8 +197,6 @@ def main(curseScrn):
 				last_pulse = now			
 				next_pulse = now + five_mins
 
-			break #STOP STOP STOP STOP STOP 
-
 			#Store current time, next soil check, and settings to save file
 			save_data[TIME_NOW]        = str(now)
 			save_data[NEXT_SOIL_CHECK] = str(next_soil_check)
@@ -171,14 +206,15 @@ def main(curseScrn):
 			#Saves the users selections, current time, next soil check
 			write_save_data(save_data)
 
+			break #STOP STOP STOP STOP STOP 
+
 		#Go to next tab
-		if cmd in "1s":
+		if cmd in "1s" or GPIO.input(BUTTON_A) == GPIO.HIGH:
 			tab_select = wrapTab(tab_select+1)
-			#print(f"Next tab {tab_select}")
 			update_ui(screen, tab_select)
 		
 		#Cycle through options in this tab
-		elif cmd in "2o":
+		elif cmd in "2o" or GPIO.input(BUTTON_B) == GPIO.HIGH:
 			tab = list(UI_tabs)[tab_select]
 			tab_options  = UI_tabs[tab][OPTIONS]
 			tab_curr_sel = UI_tabs[tab][SELECTION]
