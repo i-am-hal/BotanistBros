@@ -20,8 +20,13 @@ from liquidcrystal_i2c import LiquidCrystal_I2C as I2C_LCD
 # and have it update the physical screen as I would hope, while
 # allowing me to see and test the UI on an actual computer screen.
 class LCD:
-	def __init__(self, addr, bus, curseScrn, numlines=2, linelen=20):
-		self.lcd = I2C_LCD(addr, bus, numlines=numlines) 
+	def __init__(self, addr, bus, curseScrn, numlines=2, linelen=20, no_lcd=False):
+		self.no_lcd = no_lcd
+
+		#If no lcd screen at all, create the lcd
+		if not no_lcd:
+			self.lcd = I2C_LCD(addr, bus, numlines=numlines) 
+
 		self.curse = curseScrn
 		self.screen = [" " * linelen] * numlines
 		self.linelength = linelen
@@ -64,9 +69,10 @@ class LCD:
 	
 	def printline(self, line, string):
 		self.writeLine(line, string)
-		self.lcd.printline(line, string)
-		
 
+		#If we do have an lcd, don't write out the line
+		if not self.no_lcd:
+			self.lcd.printline(line, string)
 
 #Time unit, can be day or week
 class Time(Enum):
@@ -114,7 +120,7 @@ class WaterOption:
 	__len__ = lambda self: len(self.__repr__())
 
 #Given some text, adds spaces to the left to center the text
-def center(text, maxlength=20):
+def center(text, maxlength=20) -> str:
 	#Throw error at runtime if text is too long
 	if len(text) > maxlength:
 		raise ValueError(f"Provided string \"{text}\" is longer than max of {maxlength} characters!")
@@ -152,7 +158,10 @@ UI_tabs = {
 	"Water": {
 		SELECTION: 0,
 		OPT_LEN: 0,   #Will get set correct in prep func
-		OPTIONS: [WaterOption(10), WaterOption(15), WaterOption(20), WaterOption(25)]
+		OPTIONS: [
+			WaterOption(10), WaterOption(15), WaterOption(20), 
+			WaterOption(25), WaterOption(30), WaterOption(35)
+			]
 		} 
 }
 
@@ -181,9 +190,8 @@ def update_ui(screen, tab_select):
 	screen.printline(2, center(str(options[opt_sel])))
 	#Display to user that they have N/M selected in tab
 	screen.printline(3, " " * 15 + f"{opt_sel+1:02d}/{max_opt:02d}")
-	#screen.updateScreen()
 
-#
+#Displays all of UI, top text, and last 2 lines which always update
 def display_ui(screen, tab_select):
 	#Display the tab names at the very top
 	screen.printline(0, " | ".join(UI_tabs) + " |")
